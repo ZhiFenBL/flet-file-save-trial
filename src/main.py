@@ -8,7 +8,7 @@ logging.basicConfig(level=logging.INFO)
 def main(page: ft.Page):
     """
     Main function to create the Flet application UI and logic.
-    This uses the direct FilePicker.save_file() method.
+    This version fixes the empty file bug by capturing content before saving.
     """
     page.title = "Save Text File Directly"
     page.vertical_alignment = ft.MainAxisAlignment.START
@@ -17,6 +17,9 @@ def main(page: ft.Page):
     page.padding = 20
 
     logging.info("App starting with direct save method.")
+
+    # A variable to reliably hold the content to be saved.
+    content_to_save = ""
 
     # --- UI Controls ---
     file_name_input = ft.TextField(
@@ -46,12 +49,13 @@ def main(page: ft.Page):
         logging.info(f"FilePicker result: path={e.path}, error={e.error}")
 
         if e.path:
-            # If the user selected a path (didn't cancel)
             try:
                 logging.info(f"Attempting to write to: {e.path}")
-                # Ensure the value is not None before writing
+                
+                # CORRECTED: Use the content stored in our variable,
+                # not the value from the control.
                 with open(e.path, "w", encoding="utf-8") as f:
-                    f.write(file_content_input.value or "")
+                    f.write(content_to_save)
                 
                 show_snackbar(f"Successfully saved: {os.path.basename(e.path)}")
                 logging.info("File saved successfully.")
@@ -82,12 +86,18 @@ def main(page: ft.Page):
         This function is called when the 'Save File' button is clicked.
         It triggers the FilePicker's save_file dialog.
         """
+        # Use the 'nonlocal' keyword to modify the variable in the outer scope.
+        nonlocal content_to_save
+        
         logging.info("Save button clicked.")
         
         file_name = file_name_input.value if file_name_input.value else "new_file.txt"
+        
+        # CORRECTED: Capture the content from the input field at this exact moment.
+        content_to_save = file_content_input.value or ""
+        
         logging.info(f"Calling file_picker.save_file with filename: {file_name}")
         
-        # This is the single, correct call to save the file.
         file_picker.save_file(
             dialog_title="Save File As...",
             file_name=file_name,
@@ -108,7 +118,7 @@ def main(page: ft.Page):
                 ft.Text(
                     "Enter a filename and content, then click 'Save File'.",
                     size=12,
-                    color=ft.Colors.GREY_600,
+                    color=ft.colors.GREY_600,
                     italic=True,
                     text_align=ft.TextAlign.CENTER
                 ),
@@ -117,7 +127,7 @@ def main(page: ft.Page):
                 file_content_input,
                 ft.FilledButton(
                     text="Save File",
-                    icon=ft.Icons.SAVE,
+                    icon=ft.icons.SAVE,
                     on_click=save_file_action,
                     width=300,
                     height=50
