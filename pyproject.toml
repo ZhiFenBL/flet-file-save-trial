@@ -42,7 +42,9 @@ flet = {extras = ["all"], version = "0.28.3"}
 
 # --- Android Specific Configuration ---
 [tool.flet.android]
-# App details that will appear on the device and in the Play Store.
+split_per_abi = true
+min_sdk_version = 21
+target_sdk_version = 35# App details that will appear on the device and in the Play Store.
 package_name = "com.example.fletfilesaver"
 app_name = "File Saver"
 
@@ -51,14 +53,23 @@ app_name = "File Saver"
 icon = "src/assets/icon.png"
 
 # --- Android Permissions ---
-# While the FilePicker API is the primary method for file access on modern Android
-# and handles permissions gracefully, declaring these in the manifest is still
-# a good practice. It signals the app's intent to interact with storage.
-# The user will NOT get a generic "Allow access to storage?" pop-up with this code,
-# because the FilePicker handles access on a per-file basis.
+# This is a more comprehensive permission set to cover edge cases.
+# While FilePicker handles its own access, some OS versions are stricter
+# and expect these to be declared in the manifest to even launch the picker.
 [tool.flet.android.permission]
+"android.permission.INTERNET" = true
 "android.permission.READ_EXTERNAL_STORAGE" = true
 "android.permission.WRITE_EXTERNAL_STORAGE" = true
+# The MANAGE_EXTERNAL_STORAGE permission is powerful, but declaring it can
+# sometimes resolve issues on heavily customized Android systems.
+"android.permission.MANAGE_EXTERNAL_STORAGE" = true
 
-[tool.flet.android.apk]
-abi_filters = ["arm64-v8a"]
+# --- Android Manifest Extras ---
+# This section is CRUCIAL for compatibility with Android 10 (API 29).
+# It adds the requestLegacyExternalStorage attribute to the <application> tag
+# in the AndroidManifest.xml file. The previous syntax was incorrect.
+# This is the correct way to add the attribute.
+[tool.flet.android.manifest_extras]
+"application" = [
+    '<application android:requestLegacyExternalStorage="true">',
+]
