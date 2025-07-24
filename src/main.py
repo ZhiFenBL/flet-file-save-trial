@@ -118,7 +118,7 @@ def main(page: ft.Page):
                 ft.Text(
                     "Enter a filename and content, then click 'Save File'.",
                     size=12,
-                    color=ft.colors.GREY_600,
+                    color=ft.Colors.GREY_600,
                     italic=True,
                     text_align=ft.TextAlign.CENTER
                 ),
@@ -127,7 +127,7 @@ def main(page: ft.Page):
                 file_content_input,
                 ft.FilledButton(
                     text="Save File",
-                    icon=ft.icons.SAVE,
+                    icon=ft.Icons.SAVE,
                     on_click=save_file_action,
                     width=300,
                     height=50
