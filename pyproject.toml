@@ -1,0 +1,64 @@
+[project]
+name = "file-save"
+version = "0.1.0"
+description = ""
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [
+    { name = "Flet developer", email = "you@example.com" }
+]
+dependencies = [
+  "flet==0.28.3"
+]
+
+[tool.flet]
+# org name in reverse domain name notation, e.g. "com.mycompany".
+# Combined with project.name to build bundle ID for iOS and Android apps
+org = "com.mycompany"
+
+# project display name that is used as an app title on Android and iOS home screens,
+# shown in window titles and about app dialogs on desktop.
+product = "file-save"
+
+# company name to display in about app dialogs
+company = "Flet"
+
+# copyright text to display in about app dialogs
+copyright = "Copyright (C) 2025 by Flet"
+
+[tool.flet.app]
+path = "src"
+
+[tool.uv]
+dev-dependencies = [
+    "flet[all]==0.28.3",
+]
+
+[tool.poetry]
+package-mode = false
+
+[tool.poetry.group.dev.dependencies]
+flet = {extras = ["all"], version = "0.28.3"}
+
+# --- Android Specific Configuration ---
+[tool.flet.android]
+# App details that will appear on the device and in the Play Store.
+package_name = "com.example.fletfilesaver"
+app_name = "File Saver"
+
+# Path to your app's icon. 
+# Create an 'assets' folder in your project and place a 512x512 icon.png inside it.
+icon = "src/assets/icon.png"
+
+# --- Android Permissions ---
+# While the FilePicker API is the primary method for file access on modern Android
+# and handles permissions gracefully, declaring these in the manifest is still
+# a good practice. It signals the app's intent to interact with storage.
+# The user will NOT get a generic "Allow access to storage?" pop-up with this code,
+# because the FilePicker handles access on a per-file basis.
+[tool.flet.android.permission]
+"android.permission.READ_EXTERNAL_STORAGE" = true
+"android.permission.WRITE_EXTERNAL_STORAGE" = true
+
+[tool.flet.android.apk]
+abi_filters = ["arm64-v8a"]
