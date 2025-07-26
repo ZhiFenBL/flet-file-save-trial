@@ -1,19 +1,18 @@
 import flet as ft
-import os
 import logging
 
 logging.basicConfig(level=logging.INFO)
 
 def main(page: ft.Page):
-    page.title = "Save Text File (Latest Flet)"
+    page.title = "Save Text on Android"
     page.vertical_alignment = ft.MainAxisAlignment.START
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
     page.theme_mode = ft.ThemeMode.SYSTEM
     page.padding = 20
 
-    # --- UI Controls ---
+    # --- UI Controls (no changes) ---
     file_name_input = ft.TextField(
-        label="File Name",
+        label="Suggested File Name",
         hint_text="e.g., my_notes.txt",
         width=300,
         border_radius=ft.border_radius.all(10),
@@ -34,29 +33,19 @@ def main(page: ft.Page):
         page.snack_bar.open = True
         page.update()
 
-    # --- File Picker Logic (Corrected) ---
+    # --- File Picker Logic (MODIFIED FOR ANDROID) ---
     def save_file_result(e: ft.FilePickerResultEvent):
         """
-        This callback now handles the file writing.
+        On Android, this callback confirms the save operation was initiated.
+        It does NOT receive a path and does NOT write the file here.
         """
-        if e.path:
-            try:
-                # Get content and encode it to bytes
-                content_to_save = file_content_input.value or ""
-                file_data_bytes = content_to_save.encode("utf-8")
-                
-                # Write the bytes to the file path provided by the picker
-                with open(e.path, "wb") as f:
-                    f.write(file_data_bytes)
-                
-                show_snackbar(f"Successfully saved: {os.path.basename(e.path)}")
-                logging.info(f"File saved successfully to {e.path}")
-            except Exception as ex:
-                show_snackbar(f"Error saving file: {ex}")
-                logging.error(f"Error saving file: {ex}")
-        elif e.error:
+        if e.error:
             show_snackbar(f"FilePicker Error: {e.error}")
             logging.error(f"FilePicker Error: {e.error}")
+        # On mobile, e.path is None. A non-error result means the OS handled it.
+        elif not e.path:
+             show_snackbar("File save dialog opened successfully!")
+             logging.info("Save operation handed off to OS.")
         else:
             show_snackbar("Operation cancelled by user.")
             logging.info("File save operation cancelled.")
@@ -66,25 +55,32 @@ def main(page: ft.Page):
     file_picker = ft.FilePicker(on_result=save_file_result)
     page.overlay.append(file_picker)
 
-    # --- Actions (Corrected) ---
+    # --- Actions (MODIFIED FOR ANDROID) ---
     def save_file_action(e):
         """
-        This function now ONLY triggers the dialog.
-        The file_data argument is removed.
+        This function gets the content, converts it to bytes, and passes
+        it to the save_file method. This is required for Android.
         """
-        file_name = file_name_input.value if file_name_input.value else "new_file.txt"
+        # Get content and encode it to bytes
+        content_to_save = file_content_input.value or ""
+        file_data_bytes = content_to_save.encode("utf-8")
         
+        # Get the suggested file name
+        file_name = file_name_input.value if file_name_input.value else "new_file.txt"
+
+        # Call save_file WITH the file_data
         file_picker.save_file(
             dialog_title="Save File As...",
             file_name=file_name,
+            file_data=file_data_bytes, # <-- CRUCIAL FOR ANDROID
             allowed_extensions=["txt", "log", "md"]
         )
 
-    # --- Page Layout ---
+    # --- Page Layout (no changes) ---
     page.add(
         ft.Column(
             controls=[
-                ft.Text("Flet File Saver", size=24, weight=ft.FontWeight.BOLD),
+                ft.Text("Flet File Saver (Android)", size=24, weight=ft.FontWeight.BOLD),
                 ft.Text(
                     "Enter a filename and content, then click 'Save File'.",
                     size=12, color=ft.Colors.GREY_600
